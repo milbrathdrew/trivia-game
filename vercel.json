@@ -11,9 +11,40 @@
     }
   ],
   "routes": [
+    { "handle": "filesystem" },
+    {
+      "src": "/assets/(.*)",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "continue": true
+    },
+    {
+      "src": "/(.*)\\.(?:js|css|svg|jpg|jpeg|png|gif|ico|json|woff2?)$",
+      "headers": { "cache-control": "public, max-age=31536000, immutable" },
+      "continue": true
+    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(?:js|css|svg|jpg|jpeg|png|gif|ico|json|woff2?)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "github": {
