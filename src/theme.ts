@@ -3,37 +3,49 @@ import { extendTheme } from '@chakra-ui/react';
 const theme = extendTheme({
   styles: {
     global: {
-      body: {
-        bg: 'green.50',
-        color: 'green.900',
+      'html, body': {
+        bg: '#7CB573', // Main green background
+        color: 'white',
+        minHeight: '100vh',
       },
     },
   },
   colors: {
     brand: {
-      50: '#f0fdf4',
-      100: '#dcfce7',
-      200: '#bbf7d0',
-      300: '#86efac',
-      400: '#4ade80',
-      500: '#22c55e',
-      600: '#16a34a',
-      700: '#15803d',
-      800: '#166534',
-      900: '#14532d',
+      50: '#F0F7EF',
+      100: '#E1EFDF',
+      200: '#C3DFBF',
+      300: '#A5CF9F',
+      400: '#87BF7F',
+      500: '#7CB573', // Main green
+      600: '#63915C',
+      700: '#4A6D45',
+      800: '#31482E',
+      900: '#192417',
     },
     accent: {
-      50: '#ecfdf5',
-      100: '#d1fae5',
-      200: '#a7f3d0',
-      300: '#6ee7b7',
-      400: '#34d399',
-      500: '#10b981',
-      600: '#059669',
-      700: '#047857',
-      800: '#065f46',
-      900: '#064e3b',
+      50: '#F0F7EF',
+      100: '#E1EFDF',
+      200: '#C3DFBF',
+      300: '#A5CF9F',
+      400: '#87BF7F',
+      500: '#7CB573', // Main green
+      600: '#63915C',
+      700: '#4A6D45',
+      800: '#31482E',
+      900: '#192417',
     },
+    trivia: {
+      primary: '#7CB573',
+      accent: '#63915C',
+      sage: '#7CB573',
+      teal: '#63915C',
+      text: '#FFFFFF',
+      correct: '#22C55E',    // Brighter green for correct answers
+      correctBg: '#166534',  // Darker green background
+      wrong: '#EF4444',      // Bright red for wrong answers
+      wrongBg: '#991B1B',    // Darker red background
+    }
   },
   components: {
     Button: {
@@ -43,28 +55,45 @@ const theme = extendTheme({
       },
       variants: {
         solid: {
-          bg: 'brand.600',
+          bg: 'trivia.primary',
           color: 'white',
           _hover: {
-            bg: 'brand.700',
+            bg: 'brand.600',
+            transform: 'scale(1.02)',
           },
           _active: {
-            bg: 'brand.800',
+            bg: 'brand.700',
           },
         },
         outline: {
-          borderColor: 'brand.600',
-          color: 'brand.600',
+          borderColor: 'trivia.primary',
+          borderWidth: '2px',
+          color: 'white',
+          bg: 'transparent',
           _hover: {
-            bg: 'brand.50',
+            bg: 'whiteAlpha.100',
+            transform: 'scale(1.02)',
+          },
+          _focus: {
+            bg: 'whiteAlpha.100',
+          },
+          _active: {
+            bg: 'whiteAlpha.200',
+          },
+          _disabled: {
+            opacity: 0.6,
+            bg: 'transparent',
           },
         },
+      },
+      defaultProps: {
+        variant: 'outline',
       },
     },
     Card: {
       baseStyle: {
         container: {
-          bg: 'white',
+          bg: 'accent.600',
           borderRadius: 'xl',
           boxShadow: 'lg',
           p: 6,
@@ -74,11 +103,18 @@ const theme = extendTheme({
     Progress: {
       baseStyle: {
         filledTrack: {
-          bg: 'brand.500',
+          bg: 'trivia.primary',
         },
         track: {
-          bg: 'green.100',
+          bg: '#1D3B45',
         },
+      },
+    },
+    Container: {
+      baseStyle: {
+        maxW: 'container.sm',
+        px: { base: 4, md: 8 },
+        py: { base: 6, md: 12 },
       },
     },
   },

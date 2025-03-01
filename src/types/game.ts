@@ -1,10 +1,10 @@
 export interface Question {
-  id: string;
+  category: string;
+  type: string;
+  difficulty: 'easy' | 'medium' | 'hard';
   question: string;
   correctAnswer: string;
   incorrectAnswers: string[];
-  category: string;
-  difficulty: string;
 }
 
 export interface GameStats {
@@ -20,4 +20,5 @@ export interface GameState {
   stats: GameStats;
   isLoading: boolean;
   error: string | null;
+  selectedCategory?: number;
 } 
