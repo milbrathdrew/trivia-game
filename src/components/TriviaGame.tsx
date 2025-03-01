@@ -285,188 +285,144 @@ export default function TriviaGame() {
       .sort(() => Math.random() - 0.5);
   };
 
-  if (gameState.isLoading) {
-    return (
-      <Container centerContent>
-        <VStack spacing={4}>
-          <Spinner size="xl" />
-          <Text>Loading question{retryAttempt > 0 ? ` (Attempt ${retryAttempt}/${MAX_RETRIES})` : ''}...</Text>
-        </VStack>
-      </Container>
-    );
-  }
-
-  if (gameState.error) {
-    return (
-      <Container centerContent>
-        <VStack spacing={6}>
-          <Text color="red.500" fontSize="lg">
-            {gameState.error}
-          </Text>
-          <Button
-            colorScheme="blue"
-            onClick={() => {
-              resetRetries();
-              loadNewQuestion();
-            }}
-          >
-            Try Again
-          </Button>
-        </VStack>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxW="container.xl" py={8}>
-      {devMode && (
-        <Badge
-          colorScheme="purple"
-          position="fixed"
-          top={4}
-          right={4}
-          px={2}
-          py={1}
-          borderRadius="md"
-        >
-          Dev Mode
-        </Badge>
-      )}
-      <Flex direction={{ base: 'column', md: 'row' }} gap={8}>
-        <Stack spacing="6" flex="1">
-          <SimpleGrid columns={{ base: 1, sm: 3 }} spacing="4">
-            <Box p={4} bg="white" borderRadius="lg" boxShadow="sm">
-              <Text fontWeight="bold">Score</Text>
-              <Text fontSize="2xl">{gameState.stats.score}</Text>
-            </Box>
-            <Box p={4} bg="white" borderRadius="lg" boxShadow="sm">
-              <Text fontWeight="bold">Streak</Text>
-              <Text fontSize="2xl">{gameState.stats.streak}</Text>
-            </Box>
-            <Box p={4} bg="white" borderRadius="lg" boxShadow="sm">
-              <Text fontWeight="bold">Accuracy</Text>
-              <Text fontSize="2xl">
-                {gameState.stats.totalQuestions > 0
-                  ? Math.round((gameState.stats.correctAnswers / gameState.stats.totalQuestions) * 100)
-                  : 0}%
-              </Text>
-              <Text fontSize="sm">
-                {gameState.stats.correctAnswers}/{gameState.stats.totalQuestions}
-              </Text>
-            </Box>
-          </SimpleGrid>
+    <Container maxW="container.sm" centerContent>
+      <VStack spacing={6} align="stretch" w="full">
+        <Box bg="white" p={6} borderRadius="xl" boxShadow="lg">
+          <VStack spacing={4} align="stretch">
+            <Flex justify="space-between" align="center">
+              <Heading size="lg" color="brand.600">Trivia Challenge</Heading>
+              {devMode && (
+                <Badge colorScheme="green" p={2} borderRadius="md">
+                  Dev Mode
+                </Badge>
+              )}
+            </Flex>
+            
+            <ProgressContainer
+              progress={progress}
+              totalQuestions={MAX_QUESTIONS}
+              animate={shouldAnimate}
+            />
 
-          {gameState.currentQuestion && (
-            <Box>
-              <Heading size="md" mb={4}>
+            <Stack spacing={4}>
+              <Text fontSize="sm" color="green.700" textAlign="center" fontWeight="medium">
+                Score: {gameState.stats.score} | Streak: {gameState.stats.streak}
+              </Text>
+              <Text fontSize="sm" color="green.700" textAlign="center" fontWeight="medium">
+                Correct: {gameState.stats.correctAnswers} | Incorrect: {gameState.stats.incorrectAnswers}
+              </Text>
+            </Stack>
+          </VStack>
+        </Box>
+
+        <Box bg="white" p={6} borderRadius="xl" boxShadow="lg" minH="300px">
+          {gameState.isLoading ? (
+            <Flex justify="center" align="center" h="200px">
+              <VStack spacing={4}>
+                <Spinner size="xl" color="brand.500" thickness="4px" />
+                <Text color="green.600">
+                  Loading question{retryAttempt > 0 ? ` (Attempt ${retryAttempt}/${MAX_RETRIES})` : '...'}
+                </Text>
+              </VStack>
+            </Flex>
+          ) : gameState.error ? (
+            <VStack spacing={4} align="center" justify="center" h="200px">
+              <Text color="red.500">{gameState.error}</Text>
+              <Button onClick={() => { resetRetries(); loadNewQuestion(); }} colorScheme="green">
+                Try Again
+              </Button>
+            </VStack>
+          ) : gameState.currentQuestion ? (
+            <VStack spacing={6} align="stretch">
+              <Text fontSize="xl" fontWeight="medium" color="green.800" textAlign="center">
                 {gameState.currentQuestion.question}
-              </Heading>
-              <Stack spacing="4">
+              </Text>
+              <SimpleGrid columns={1} spacing={3}>
                 {shuffleAnswers(gameState.currentQuestion).map((answer) => {
-                  const isCorrectAnswer = answer === gameState.currentQuestion?.correctAnswer;
-                  const isSelected = answer === selectedAnswer;
-                  const showCorrectHighlight = isAnswerLocked && (devMode || isCorrectAnswer);
+                  const isSelected = selectedAnswer === answer;
+                  const isCorrect = answer === gameState.currentQuestion?.correctAnswer;
+                  const showResult = isAnswerLocked;
                   
-                  // Calculate potential progress changes
-                  const difficulty = gameState.currentQuestion?.difficulty ?? 'medium';
-                  const progressChange = isCorrectAnswer ? 
-                    '+1.0' : // Correct answers always give 1 point
-                    `-${difficulty === 'easy' ? '0.1' :
-                       difficulty === 'medium' ? '0.25' : '0.4'}`; // Loss based on difficulty
-                  
+                  let buttonProps: { variant: string; bg: string; borderColor?: string } = {
+                    variant: 'outline',
+                    bg: 'white',
+                  };
+
+                  if (showResult) {
+                    if (isCorrect) {
+                      buttonProps.bg = 'green.50';
+                      buttonProps.borderColor = 'green.500';
+                    } else if (isSelected && !isCorrect) {
+                      buttonProps.bg = 'red.50';
+                      buttonProps.borderColor = 'red.500';
+                    }
+                  } else if (isSelected) {
+                    buttonProps.bg = 'brand.50';
+                  }
+
                   return (
                     <Button
                       key={answer}
                       onClick={() => handleAnswer(answer)}
-                      size="lg"
-                      variant="outline"
-                      whiteSpace="normal"
-                      height="auto"
-                      py={4}
                       isDisabled={isAnswerLocked}
-                      bg={isAnswerLocked && isSelected ? (isCorrectAnswer ? 'green.50' : 'red.50') : undefined}
-                      borderColor={showCorrectHighlight ? 'green.500' : 
-                                 isAnswerLocked && isSelected ? 'red.500' : undefined}
-                      _hover={{
-                        borderColor: showCorrectHighlight ? 'green.600' : undefined,
-                        bg: showCorrectHighlight ? 'green.50' : undefined,
-                      }}
-                      position="relative"
+                      size="lg"
+                      h="auto"
+                      py={4}
+                      whiteSpace="normal"
+                      textAlign="center"
+                      {...buttonProps}
                     >
-                      <Flex justify="space-between" align="center" width="100%">
-                        <Text>{answer}</Text>
-                        <Flex align="center" gap={2}>
-                          {devMode && !isAnswerLocked && (
-                            <Badge 
-                              colorScheme={isCorrectAnswer ? 'green' : 'red'}
-                              variant="subtle"
-                            >
-                              {progressChange}
-                            </Badge>
-                          )}
-                          {showCorrectHighlight && (
-                            <Badge colorScheme="green">
-                              Correct
-                            </Badge>
-                          )}
-                        </Flex>
-                      </Flex>
+                      <Text>{answer}</Text>
+                      {devMode && !isAnswerLocked && gameState.currentQuestion && (
+                        <Badge
+                          ml={2}
+                          colorScheme={answer === gameState.currentQuestion.correctAnswer ? 'green' : 'red'}
+                        >
+                          {answer === gameState.currentQuestion.correctAnswer ? '+1.0' : 
+                            gameState.currentQuestion.difficulty === 'easy' ? '-0.1' :
+                            gameState.currentQuestion.difficulty === 'medium' ? '-0.25' : '-0.4'}
+                        </Badge>
+                      )}
                     </Button>
                   );
                 })}
-                {isAnswerLocked && !showCompletionModal && (
-                  <Button
-                    colorScheme="blue"
-                    size="lg"
-                    onClick={loadNewQuestion}
-                    mt={4}
-                    isLoading={gameState.isLoading}
-                  >
-                    Next Question
-                  </Button>
-                )}
-              </Stack>
-            </Box>
-          )}
-        </Stack>
+              </SimpleGrid>
+              {isAnswerLocked && !showCompletionModal && (
+                <Button
+                  colorScheme="green"
+                  size="lg"
+                  onClick={loadNewQuestion}
+                  mt={4}
+                  isLoading={gameState.isLoading}
+                >
+                  Next Question
+                </Button>
+              )}
+            </VStack>
+          ) : null}
+        </Box>
 
-        <Flex
-          direction={{ base: 'row', md: 'column' }}
-          align="center"
-          justify="center"
-          minW={{ base: 'full', md: '120px' }}
-          h={{ base: '60px', md: 'auto' }}
-        >
-          {gameState.currentQuestion && (
-            <Box w="full" h="full">
-              <ProgressContainer
-                isCorrect={lastAnswer}
-                difficulty={gameState.currentQuestion.difficulty}
-                animate={shouldAnimate}
-                progress={progress}
-              />
-            </Box>
-          )}
-        </Flex>
-      </Flex>
-
-      <Modal isOpen={showCompletionModal} onClose={() => {}}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Congratulations! 🎉</ModalHeader>
-          <ModalBody>
-            <Text>You've completed the game with a score of {gameState.stats.score}!</Text>
-            <Text mt={2}>
-              Final Accuracy: {Math.round((gameState.stats.correctAnswers / gameState.stats.totalQuestions) * 100)}%
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={resetGame}>
-              Play Again
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        <Modal isOpen={showCompletionModal} onClose={() => {}} isCentered>
+          <ModalOverlay />
+          <ModalContent bg="white" p={6}>
+            <ModalHeader color="brand.600" textAlign="center">Game Complete!</ModalHeader>
+            <ModalBody>
+              <VStack spacing={4} align="stretch">
+                <Text textAlign="center" color="green.700" fontWeight="medium">Final Score: {gameState.stats.score}</Text>
+                <Text textAlign="center" color="green.700" fontWeight="medium">Correct Answers: {gameState.stats.correctAnswers}</Text>
+                <Text textAlign="center" color="green.700" fontWeight="medium">Incorrect Answers: {gameState.stats.incorrectAnswers}</Text>
+                <Text textAlign="center" color="green.700" fontWeight="medium">Longest Streak: {gameState.stats.streak}</Text>
+              </VStack>
+            </ModalBody>
+            <ModalFooter justifyContent="center">
+              <Button onClick={resetGame} colorScheme="green" size="lg">
+                Play Again
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </VStack>
     </Container>
   );
 } 
